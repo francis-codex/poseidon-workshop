@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_lang::system_program::{Transfer, transfer};
+use anchor_lang::system_program::{transfer, Transfer};
 declare_id!("CsSzWLts5c6Aw9Ab6FMKDd7XGJ2SdhJgkZm5TbY3nhdQ");
 #[program]
 pub mod vault_program {
@@ -55,39 +55,39 @@ pub struct InitializeContext<'info> {
         bump,
     )]
     pub state: Account<'info, Vault>,
+    #[account(mut, seeds = [b"vault", auth.key().as_ref()], bump)]
+    pub vault: SystemAccount<'info>,
+    #[account(mut)]
+    pub owner: Signer<'info>,
     #[account(seeds = [b"auth", state.key().as_ref()], bump)]
     /// CHECK: This acc is safe
     pub auth: UncheckedAccount<'info>,
-    #[account(mut)]
-    pub owner: Signer<'info>,
-    #[account(mut, seeds = [b"vault", auth.key().as_ref()], bump)]
-    pub vault: SystemAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 #[derive(Accounts)]
 pub struct DepositContext<'info> {
-    #[account(seeds = [b"state", owner.key().as_ref()], bump = state.state_bump)]
-    pub state: Account<'info, Vault>,
     #[account(mut)]
     pub owner: Signer<'info>,
     #[account(seeds = [b"auth", state.key().as_ref()], bump = state.auth_bump)]
     /// CHECK: This acc is safe
     pub auth: UncheckedAccount<'info>,
+    #[account(seeds = [b"state", owner.key().as_ref()], bump = state.state_bump)]
+    pub state: Account<'info, Vault>,
     #[account(mut, seeds = [b"vault", auth.key().as_ref()], bump = state.vault_bump)]
     pub vault: SystemAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 #[derive(Accounts)]
 pub struct WithdrawContext<'info> {
+    #[account(seeds = [b"state", owner.key().as_ref()], bump = state.state_bump)]
+    pub state: Account<'info, Vault>,
+    #[account(mut, seeds = [b"vault", auth.key().as_ref()], bump = state.vault_bump)]
+    pub vault: SystemAccount<'info>,
+    #[account(mut)]
+    pub owner: Signer<'info>,
     #[account(seeds = [b"auth", state.key().as_ref()], bump = state.auth_bump)]
     /// CHECK: This acc is safe
     pub auth: UncheckedAccount<'info>,
-    #[account(mut)]
-    pub owner: Signer<'info>,
-    #[account(mut, seeds = [b"vault", auth.key().as_ref()], bump = state.vault_bump)]
-    pub vault: SystemAccount<'info>,
-    #[account(seeds = [b"state", owner.key().as_ref()], bump = state.state_bump)]
-    pub state: Account<'info, Vault>,
     pub system_program: Program<'info, System>,
 }
 #[account]
